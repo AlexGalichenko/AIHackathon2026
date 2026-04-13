@@ -1,5 +1,5 @@
 ---
-name: md-to-test-cases
+name: create-test-cases-from-docs
 description: This skill should be used when the user asks to "create test cases from docs", "generate manual test cases", "parse markdown and create tests", "convert documentation to test cases", "write test cases from markdown", "create QA test cases", "generate test plan from docs", "analyze docs and create tests", "create test cases from this GitHub link", "generate tests from GitHub wiki", or wants to derive manual test cases from markdown documentation files or a GitHub URL.
 argument-hint: "Provide a GitHub URL, file path, or paste markdown content to analyze for test case generation."
 version: 0.1.0
