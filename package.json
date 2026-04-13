@@ -1,0 +1,24 @@
+{
+  "name": "aihackathon2026",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/AlexGalichenko/AIHackathon2026#readme",
+  "bugs": {
+    "url": "https://github.com/AlexGalichenko/AIHackathon2026/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexGalichenko/AIHackathon2026.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@playwright/cli": "^0.1.7",
+    "@playwright/test": "^1.59.1"
+  }
+}
