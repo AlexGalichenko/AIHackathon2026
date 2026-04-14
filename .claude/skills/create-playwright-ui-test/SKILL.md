@@ -1,5 +1,5 @@
 ---
-name: create-playwright-test
+name: create-playwright-ui-test
 description: This skill should be used when the user asks to "create a playwright test from a test case", "automate this test case", "convert manual test to playwright", "implement this test case in playwright", "generate playwright test from markdown", "write a test for this", "turn this test case into code", "implement this manual test", or wants to translate a human-readable markdown test case into a Playwright TypeScript test by exploring the live application.
 argument-hint: "Provide the markdown test case content, a file path to the test case, or a test case ID. Optionally include the app URL if not in the test case."
 version: 0.1.0
