@@ -1,5 +1,5 @@
 ---
-name: create-test-cases-from-docs
+name: create-manual-ui-test
 description: This skill should be used when the user asks to "create test cases from docs", "generate manual test cases", "parse markdown and create tests", "convert documentation to test cases", "write test cases from markdown", "create QA test cases", "generate test plan from docs", "analyze docs and create tests", "create test cases from this GitHub link", "generate tests from GitHub wiki", or wants to derive manual test cases from markdown documentation files or a GitHub URL.
 argument-hint: "Provide a GitHub URL, file path, or paste markdown content to analyze for test case generation."
 version: 0.1.0
@@ -135,9 +135,9 @@ Output the test cases as a markdown document:
 
 Group test cases by feature area with `##` headings. Include a summary table at the top listing all test IDs, titles, and priorities.
 
-### Step 5: Ask to Save
+### Step 5: Save File
 
-After generating the test cases, ask the user whether to save the output to a file. If yes, default to `test-cases/<source-filename>-test-cases.md` (create the `test-cases/` directory if needed).
+After generating the test cases, save the output to a file. If yes, default to `test-cases/<source-filename>-test-cases.md` (create the `test-cases/` directory if needed).
 
 ## Coverage Heuristics
 
