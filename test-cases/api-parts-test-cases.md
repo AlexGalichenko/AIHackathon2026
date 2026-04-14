@@ -2,7 +2,7 @@
 
 **Source**: `./data-source/oas-spec.yaml`
 **Generated**: 2026-04-14
-**Total cases**: 50
+**Total cases**: 62
 
 ---
 
@@ -61,6 +61,18 @@
 | TC-PCAT-012 | name over max length (101 chars) returns 400 | Medium | Part Categories Validation |
 | TC-PCAT-013 | parent set to non-existent ID returns 400 | High | Part Categories Relational Integrity |
 | TC-PCAT-014 | Create child category with valid parent ID | High | Part Categories Relational Integrity |
+| TC-PCAT-015 | Delete non-existent category returns 404 | High | Part Categories CRUD |
+| TC-PCAT-016 | Full update category with PUT returns 200 | High | Part Categories CRUD |
+| TC-PCAT-017 | Unauthenticated POST returns 401 | Critical | Part Categories Auth |
+| TC-PCAT-018 | limit=1 returns at most one result | High | Part Categories Pagination |
+| TC-PCAT-019 | offset beyond count returns empty list | Medium | Part Categories Pagination |
+| TC-PCAT-020 | Ordering by valid fields returns 200 | Medium | Part Categories Ordering |
+| TC-PCAT-021 | Ordering by invalid field returns 200 | Medium | Part Categories Ordering |
+| TC-PCAT-022 | Search by created category name returns result | High | Part Categories Search |
+| TC-PCAT-023 | description over max length (251 chars) returns 400 | Medium | Part Categories Validation |
+| TC-PCAT-024 | parent=null accepted when nullable | Medium | Part Categories Validation |
+| TC-PCAT-025 | Read-only field pk in POST body is ignored | Low | Part Categories Validation |
+| TC-PCAT-026 | default_location set to non-existent ID returns 400 | Medium | Part Categories Relational Integrity |
 
 ---
 
@@ -1195,3 +1207,273 @@ HTTP `201`. Response body contains `parent: {{PARENT_CATEGORY_ID}}` and `level` 
 
 **Notes**
 Delete the created child category after verifying.
+
+---
+
+### TC-PCAT-015 — Delete non-existent category returns 404
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Component | `DELETE /api/part/category/{id}/` |
+| Test Type | Negative |
+
+**Preconditions**
+- Token auth is available
+- Category `999999` does not exist
+
+**Steps**
+1. Send `DELETE {{BASE_URL}}/api/part/category/999999/` with header `Authorization: Token {{TOKEN}}`
+2. Observe the HTTP response status code
+
+**Expected Result**
+HTTP `404`.
+
+---
+
+### TC-PCAT-016 — Full update category with PUT returns 200
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Component | `PUT /api/part/category/{id}/` |
+| Test Type | Positive |
+
+**Preconditions**
+- A category with known `pk` exists
+- Token auth is available
+
+**Steps**
+1. Send `PUT {{BASE_URL}}/api/part/category/{{CATEGORY_ID}}/` with header `Authorization: Token {{TOKEN}}`
+2. Set request body to: `{ "name": "Updated Category Name" }`
+3. Observe the HTTP response status code and body
+
+**Expected Result**
+HTTP `200`. Response body contains `name: "Updated Category Name"`.
+
+**Notes**
+Delete the category after verifying.
+
+---
+
+### TC-PCAT-017 — Unauthenticated POST returns 401
+
+| Field | Value |
+|-------|-------|
+| Priority | Critical |
+| Component | `POST /api/part/category/` |
+| Test Type | Negative |
+
+**Preconditions**
+- No `Authorization` header is sent
+
+**Steps**
+1. Send `POST {{BASE_URL}}/api/part/category/` with body `{ "name": "Unauth Category" }` and **no** `Authorization` header
+2. Observe the HTTP response status code
+
+**Expected Result**
+HTTP `401`. No category is created.
+
+---
+
+## Part Categories Pagination
+
+### TC-PCAT-018 — limit=1 returns at most one result
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Component | `GET /api/part/category/` — pagination |
+| Test Type | Positive |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `GET {{BASE_URL}}/api/part/category/` with query params `limit=1&offset=0` and header `Authorization: Token {{TOKEN}}`
+2. Observe the `results` array length
+
+**Expected Result**
+HTTP `200`. `results` contains at most 1 item.
+
+---
+
+### TC-PCAT-019 — offset beyond count returns empty list
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `GET /api/part/category/` — pagination |
+| Test Type | Boundary |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `GET {{BASE_URL}}/api/part/category/` with query params `limit=10&offset=999999` and header `Authorization: Token {{TOKEN}}`
+2. Observe the response body
+
+**Expected Result**
+HTTP `200`. `results` array is empty (`[]`).
+
+---
+
+## Part Categories Ordering
+
+### TC-PCAT-020 — Ordering by valid fields returns 200
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `GET /api/part/category/` — ordering |
+| Test Type | Positive |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. For each value in `[name, -name, pathstring, -pathstring, level, -level, part_count, -part_count]`:
+   Send `GET {{BASE_URL}}/api/part/category/` with query params `limit=5&ordering=<value>` and header `Authorization: Token {{TOKEN}}`
+2. Observe the HTTP response status code for each request
+
+**Expected Result**
+HTTP `200` for every valid ordering value.
+
+---
+
+### TC-PCAT-021 — Ordering by invalid field returns 200
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `GET /api/part/category/` — ordering |
+| Test Type | Negative |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `GET {{BASE_URL}}/api/part/category/` with query params `limit=10&ordering=not_a_valid_field` and header `Authorization: Token {{TOKEN}}`
+2. Observe the HTTP response status code
+
+**Expected Result**
+HTTP `200`. API silently ignores unknown ordering values.
+
+---
+
+## Part Categories Search (extended)
+
+### TC-PCAT-022 — Search by created category name returns result
+
+| Field | Value |
+|-------|-------|
+| Priority | High |
+| Component | `GET /api/part/category/` — search |
+| Test Type | Positive |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Create a category named `"Searchable Category XYZ"` via `POST /api/part/category/`
+2. Send `GET {{BASE_URL}}/api/part/category/` with query params `limit=10&search=Searchable+Category+XYZ` and header `Authorization: Token {{TOKEN}}`
+3. Inspect the `results` array
+4. Delete the created category
+
+**Expected Result**
+HTTP `200`. The created category's `pk` appears in `results`.
+
+---
+
+## Part Categories Validation (extended)
+
+### TC-PCAT-023 — description over max length (251 chars) returns 400
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `POST /api/part/category/` — field: description |
+| Test Type | Boundary |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `POST {{BASE_URL}}/api/part/category/` with header `Authorization: Token {{TOKEN}}`
+2. Set request body to: `{ "name": "Valid Name", "description": "<251-character string>" }`
+3. Observe the HTTP response status code
+
+**Expected Result**
+HTTP `400`. Response body contains a `description` key with a max-length error.
+
+---
+
+### TC-PCAT-024 — parent=null accepted when nullable
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `POST /api/part/category/` — field: parent |
+| Test Type | Positive |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `POST {{BASE_URL}}/api/part/category/` with header `Authorization: Token {{TOKEN}}`
+2. Set request body to: `{ "name": "Root Category", "parent": null }`
+3. Observe the HTTP response status code and body
+
+**Expected Result**
+HTTP `201`. Response body has `parent: null`.
+
+**Notes**
+Delete the created category after verifying.
+
+---
+
+### TC-PCAT-025 — Read-only field pk in POST body is ignored
+
+| Field | Value |
+|-------|-------|
+| Priority | Low |
+| Component | `POST /api/part/category/` — field: pk |
+| Test Type | Edge Case |
+
+**Preconditions**
+- Token auth is available
+
+**Steps**
+1. Send `POST {{BASE_URL}}/api/part/category/` with header `Authorization: Token {{TOKEN}}`
+2. Set request body to: `{ "name": "PK Override Cat", "pk": 99999 }`
+3. Observe the HTTP response status code and returned `pk`
+
+**Expected Result**
+HTTP `201`. The `pk` in the response is server-assigned, not `99999`.
+
+**Notes**
+Delete the created category after verifying.
+
+---
+
+## Part Categories Relational Integrity (extended)
+
+### TC-PCAT-026 — default_location set to non-existent ID returns 400
+
+| Field | Value |
+|-------|-------|
+| Priority | Medium |
+| Component | `POST /api/part/category/` — relational field: default_location |
+| Test Type | Negative |
+
+**Preconditions**
+- Token auth is available
+- Stock location `999999` does not exist
+
+**Steps**
+1. Send `POST {{BASE_URL}}/api/part/category/` with header `Authorization: Token {{TOKEN}}`
+2. Set request body to: `{ "name": "Bad Location Category", "default_location": 999999 }`
+3. Observe the HTTP response status code
+
+**Expected Result**
+HTTP `400`. Response body contains a `default_location` key with an error.
