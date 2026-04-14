@@ -15,10 +15,15 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:ui": "playwright test automation/ui",
+    "test:api": "playwright test automation/api"
   },
   "dependencies": {
     "@playwright/cli": "^0.1.7",
-    "@playwright/test": "^1.59.1"
+    "@playwright/test": "^1.59.1",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0"
   }
 }
