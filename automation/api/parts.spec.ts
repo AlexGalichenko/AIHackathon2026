@@ -198,6 +198,28 @@ test.describe("Parts — Filtering", () => {
     }
   });
 
+  test("TC-PART-017 filter by valid category ID returns parts in that category", async ({ apiRequest }) => {
+    const catResp = await apiRequest.post("/api/part/category/", {
+      data: { name: `Filter Test Category ${Math.random().toString(36).slice(2, 9)}` },
+    });
+    expect(catResp.status()).toBe(201);
+    const cat = await catResp.json();
+
+    const part = await createPart(apiRequest, { category: cat.pk });
+
+    const resp = await apiRequest.get("/api/part/", { params: { limit: 50, category: cat.pk } });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    const pks = body.results.map((p: { pk: number }) => p.pk);
+    expect(pks).toContain(part.pk);
+    for (const p of body.results) {
+      expect(p.category).toBe(cat.pk);
+    }
+
+    await deletePart(apiRequest, part.pk);
+    await apiRequest.delete(`/api/part/category/${cat.pk}/`);
+  });
+
   test("TC-PART-018 filter by non-existent category returns 200 (API ignores unknown category ID)", async ({ apiRequest }) => {
     const resp = await apiRequest.get("/api/part/", { params: { limit: 10, category: MISSING_ID } });
     expect(resp.status()).toBe(200);
@@ -238,6 +260,20 @@ test.describe("Parts — Ordering", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("Parts — Search", () => {
+  test("TC-PART-023 search with matching term returns the part in results", async ({ apiRequest }) => {
+    const uniqueName = `SearchableResistor_${Math.random().toString(36).slice(2, 9)}`;
+    const part = await createPart(apiRequest, { name: uniqueName });
+
+    const resp = await apiRequest.get("/api/part/", { params: { limit: 10, search: uniqueName } });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body.count).toBeGreaterThan(0);
+    const pks = body.results.map((p: { pk: number }) => p.pk);
+    expect(pks).toContain(part.pk);
+
+    await deletePart(apiRequest, part.pk);
+  });
+
   test("TC-PART-024 search with non-matching term returns empty list", async ({ apiRequest }) => {
     const resp = await apiRequest.get("/api/part/", { params: { limit: 10, search: "zzz_no_match_xyzxyz_99999" } });
     expect(resp.status()).toBe(200);
