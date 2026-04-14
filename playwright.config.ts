@@ -1,4 +1,7 @@
 import { defineConfig, devices, ReporterDescription } from "@playwright/test";
+import { config } from "dotenv";
+
+config();
 
 const reporter: ReporterDescription[] = [
   ["html", { outputFolder: "report", open: "never" }],
