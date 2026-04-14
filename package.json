@@ -16,7 +16,22 @@
   "main": "index.js",
   "scripts": {
     "test:ui": "playwright test automation/ui",
-    "test:api": "playwright test automation/api"
+    "test:api": "playwright test automation/api",
+
+    "pipeline:api": "playwright test automation/api --reporter=line",
+    "pipeline:api:generate": "echo 'Run: /orchestrator api [spec-path]' && exit 0",
+
+    "pipeline:sync": "playwright test automation/api --reporter=line",
+    "pipeline:sync:run": "echo 'Run: /orchestrator sync [spec-path]' && exit 0",
+
+    "pipeline:ui": "playwright test automation/ui --reporter=line",
+    "pipeline:ui:run": "echo 'Run: /orchestrator ui [docs-source]' && exit 0",
+
+    "pipeline:manual": "echo 'Run: /orchestrator manual [TC-IDs or all]' && exit 0",
+
+    "pipeline:fix": "playwright test --reporter=line 2>&1 || true",
+    "pipeline:fix:api": "playwright test automation/api --reporter=line",
+    "pipeline:fix:ui": "playwright test automation/ui --reporter=line"
   },
   "dependencies": {
     "@playwright/cli": "^0.1.7",
